@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>打地鼠遊戲</title>
+  <link rel="preload" as="image" href="https://raw.githubusercontent.com/Hinake27/Whack-a-Mole/main/images/mole.png">
+  <link rel="preload" as="image" href="https://raw.githubusercontent.com/Hinake27/Whack-a-Mole/main/images/bonus-mole.png">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
 
@@ -69,7 +71,7 @@
       left: 50%;
       transform: translateX(-50%) translateY(100%);
       transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      background: url('./images/mole.png') center/cover;
+      background: url('https://raw.githubusercontent.com/Hinake27/Whack-a-Mole/main/images/mole.png') center/cover;
       opacity: 0;
     }
 
@@ -79,7 +81,7 @@
     }
 
     .mole.bonus {
-      background: url('./images/bonus-mole.png') center/cover;
+      background: url('https://raw.githubusercontent.com/Hinake27/Whack-a-Mole/main/images/bonus-mole.png') center/cover;
       filter: drop-shadow(0 0 10px #ff0);
     }
 
