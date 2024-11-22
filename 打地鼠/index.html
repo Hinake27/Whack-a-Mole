@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>打地鼠遊戲</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
+
+    body {
+      background: linear-gradient(135deg, #87CEEB, #90EE90);
+      font-family: 'Bangers', cursive;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .game-container {
+      width: 500px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+      background: #4a4a4a;
+      padding: 15px;
+      border-radius: 15px;
+    }
+    
+    .score, .timer {
+      font-size: 28px;
+      color: #fff;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      padding: 20px;
+      background: #8B4513;
+      border-radius: 15px;
+    }
+
+    .hole {
+      width: 120px;
+      height: 120px;
+      background: #442211;
+      border-radius: 50%;
+      position: relative;
+      cursor: pointer;
+      box-shadow: inset 0 -8px 0 2px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+
+    .mole {
+      width: 100px;
+      height: 100px;
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%) translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      background: url('./images/mole.png') center/cover;
+      opacity: 0;
+    }
+
+    .mole.show {
+      transform: translateX(-50%) translateY(0%);
+      opacity: 1;
+    }
+
+    .mole.bonus {
+      background: url('./images/bonus-mole.png') center/cover;
+      filter: drop-shadow(0 0 10px #ff0);
+    }
+
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 24px;
+      font-family: 'Bangers', cursive;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      margin: 10px;
+    }
+
+    button:hover {
+      background: #45a049;
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(2px);
+    }
+
+    .game-over {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 40px;
+      border-radius: 20px;
+      display: none;
+      z-index: 100;
+      text-align: center;
+      min-width: 300px;
+    }
+
+    .game-over.show {
+      display: block;
+      animation: popup 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popup {
+      0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+
+    .game-over h2 {
+      font-size: 48px;
+      margin: 0 0 20px 0;
+      color: #FFD700;
+      text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+    }
+
+    .final-score {
+      font-size: 64px;
+      color: #fff;
+      display: block;
+      margin: 20px 0;
+      text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+    }
+
+    .hit-effect {
+      position: absolute;
+      pointer-events: none;
+      font-size: 32px;
+      font-weight: bold;
+      color: #FFD700;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+      animation: hitFloat 0.5s ease-out forwards;
+      z-index: 10;
+    }
+
+    @keyframes hitFloat {
+      0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+      100% { transform: translate(-50%, -200%) scale(1.5); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <div class="stats">
+      <div class="score">分數: <span id="score">0</span></div>
+      <div class="timer">時間: <span id="timer">60</span>s</div>
+    </div>
+    <button onclick="startGame()">開始遊戲</button>
+    <div class="grid">
+      <div class="hole"><div class="mole"></div></div>
+      <div class="hole"><div class="mole"></div></div>
+      <div class="hole"><div class="mole"></div></div>
+      <div class="hole"><div class="mole"></div></div>
+      <div class="hole"><div class="mole"></div></div>
+      <div class="hole"><div class="mole"></div></div>
+      <div class="hole"><div class="mole"></div></div>
+      <div class="hole"><div class="mole"></div></div>
+      <div class="hole"><div class="mole"></div></div>
+    </div>
+    <div class="game-over">
+      <h2>遊戲結束</h2>
+      <p>最終得分: <span class="final-score">0</span></p>
+      <button onclick="startGame()">再次遊玩</button>
+    </div>
+  </div>
+
+  <script>
+    let score = 0;
+    let gameRunning = false;
+    let currentMole = null;
+    let timeLeft = 60;
+    let timerInterval;
+    
+    function createHitEffect(x, y, points) {
+      const effect = document.createElement('div');
+      effect.className = 'hit-effect';
+      effect.textContent = points > 0 ? `+${points}` : points;
+      effect.style.left = `${x}px`;
+      effect.style.top = `${y}px`;
+      effect.style.color = points > 0 ? '#FFD700' : '#FF4444';
+      document.body.appendChild(effect);
+      setTimeout(() => effect.remove(), 500);
+    }
+
+    document.querySelectorAll('.hole').forEach(hole => {
+      hole.addEventListener('click', (e) => {
+        if (!gameRunning) return;
+        
+        const mole = hole.querySelector('.mole');
+        if (mole.classList.contains('show')) {
+          const points = mole.classList.contains('bonus') ? 20 : 10;
+          score += points;
+          createHitEffect(e.clientX, e.clientY, points);
+          mole.classList.remove('show', 'bonus');
+        } else {
+          score = Math.max(0, score - 5);
+          createHitEffect(e.clientX, e.clientY, -5);
+        }
+        document.getElementById('score').textContent = score;
+      });
+    });
+
+    function showRandomMole() {
+      if (!gameRunning) return;
+      
+      if (currentMole) {
+        currentMole.classList.remove('show', 'bonus');
+      }
+      
+      const moles = document.querySelectorAll('.mole');
+      const randomIndex = Math.floor(Math.random() * moles.length);
+      currentMole = moles[randomIndex];
+      currentMole.classList.add('show');
+      
+      if (Math.random() < 0.2) {
+        currentMole.classList.add('bonus');
+      }
+      
+      const timeout = Math.random() * 1000 + 500;
+      setTimeout(showRandomMole, timeout);
+    }
+
+    function updateTimer() {
+      document.getElementById('timer').textContent = timeLeft;
+      if (timeLeft <= 0) {
+        endGame();
+      }
+      timeLeft--;
+    }
+
+    function endGame() {
+      gameRunning = false;
+      clearInterval(timerInterval);
+      if (currentMole) {
+        currentMole.classList.remove('show', 'bonus');
+      }
+      document.querySelector('.game-over .final-score').textContent = score;
+      document.querySelector('.game-over').classList.add('show');
+    }
+
+    function startGame() {
+      document.querySelector('.game-over').classList.remove('show');
+      score = 0;
+      timeLeft = 60;
+      document.getElementById('score').textContent = score;
+      document.getElementById('timer').textContent = timeLeft;
+      gameRunning = true;
+      showRandomMole();
+      
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+      timerInterval = setInterval(updateTimer, 1000);
+    }
+  </script>
+</body>
+</html>
